@@ -1,0 +1,66 @@
+name: Publicar
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: publicar
+  cancel-in-progress: true
+
+jobs:
+  site:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx vite build --config vite.desktop.config.ts
+        env:
+          PISO_BASE: /piso-tablado/
+          PISO_OUT: dist-pages
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist-pages
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm install --no-save electron@33.4.11 electron-builder@25.1.8
+      - run: npx vite build --config vite.desktop.config.ts
+        env:
+          PISO_BASE: ./
+          PISO_OUT: dist-desktop
+      - run: npx electron-builder --win nsis --x64 --config desktop/electron-builder.yml
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.0
+          name: Piso Tablado para Windows
+          body: |
+            Instalador do Piso Tablado para Windows.
+            Abra o arquivo, escolha a pasta e conclua. O atalho fica na área de trabalho e no menu Iniciar.
+            O Windows pode avisar que o programa não tem assinatura digital. Escolha Mais informações e Executar mesmo assim.
+          files: release/Instalar-Piso-Tablado.exe
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

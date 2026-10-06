@@ -1,0 +1,30 @@
+appId: br.digitalproducoes.pisotablado
+productName: Piso Tablado
+copyright: Digital Produções e Eventos
+asar: true
+directories:
+  output: release
+files:
+  - desktop/electron.cjs
+  - dist-desktop/**/*
+extraMetadata:
+  main: desktop/electron.cjs
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: public/marca-digital.png
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  allowElevation: true
+  installerLanguages:
+    - pt_BR
+  language: "1046"
+  shortcutName: Piso Tablado
+  uninstallDisplayName: Piso Tablado
+  artifactName: Instalar-Piso-Tablado.${ext}
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
